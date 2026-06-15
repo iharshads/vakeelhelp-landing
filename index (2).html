@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VakeelHelp: AI Legal Research for Indian Advocates</title>
+<meta name="description" content="VakeelHelp helps Indian advocates research case law, build litigation strategy, and understand court patterns in minutes, not hours. Early access opening November 2026.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0B1120;
+    --bg-elevated: #141C32;
+    --bg-card: #18233E;
+    --border: #2A3553;
+    --border-light: #344066;
+    --ivory: #F4F0E6;
+    --ivory-dim: #C9C4B6;
+    --gold: #C9A227;
+    --gold-bright: #E0BC4A;
+    --slate: #8B95B0;
+    --slate-dim: #5C6688;
+    --green: #3DDC97;
+    --red-soft: #E27D7D;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ivory);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  .serif { font-family: 'Fraunces', serif; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* Background texture */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; height: 600px;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201,162,39,0.08), transparent),
+      radial-gradient(ellipse 60% 40% at 80% 10%, rgba(61,220,151,0.04), transparent);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ============ NAV ============ */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 0;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .logo-mark {
+    width: 30px; height: 30px;
+    border: 1.5px solid var(--gold);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    color: var(--gold);
+    font-weight: 600;
+  }
+  .nav-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--slate);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 100px;
+  }
+  .pulse-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 0 rgba(61,220,151,0.6);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(61,220,151,0.5); }
+    70% { box-shadow: 0 0 0 6px rgba(61,220,151,0); }
+    100% { box-shadow: 0 0 0 0 rgba(61,220,151,0); }
+  }
+
+  /* ============ HERO ============ */
+  .hero {
+    padding: 72px 0 56px;
+    border-bottom: 1px solid var(--border);
+  }
+  .docket {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .docket-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    white-space: nowrap;
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 64px;
+    align-items: start;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 56px;
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+    color: var(--ivory);
+    margin-bottom: 24px;
+  }
+  h1 em {
+    font-style: italic;
+    color: var(--gold-bright);
+    font-weight: 400;
+  }
+
+  .hero-sub {
+    font-size: 17px;
+    color: var(--slate);
+    max-width: 480px;
+    margin-bottom: 32px;
+  }
+
+  .hero-side {
+    border-left: 1px solid var(--border);
+    padding-left: 40px;
+    padding-top: 8px;
+  }
+  .hero-side-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--slate-dim);
+    margin-bottom: 14px;
+  }
+  .hero-side p {
+    font-size: 14px;
+    color: var(--ivory-dim);
+    margin-bottom: 16px;
+  }
+  .hero-side .target-date {
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    font-weight: 500;
+    color: var(--gold-bright);
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+  .hero-side .target-sub {
+    font-size: 13px;
+    color: var(--slate);
+  }
+
+  /* ============ SIGNUP ============ */
+  .signup-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    padding: 32px;
+    display: grid;
+    grid-template-columns: 1.1fr 1px 1fr;
+    gap: 32px;
+    align-items: center;
+  }
+  .signup-divider {
+    background: var(--border);
+    height: 100%;
+  }
+  .signup-left h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--ivory);
+  }
+  .signup-left p {
+    font-size: 14px;
+    color: var(--slate);
+    margin-bottom: 0;
+  }
+  .cohort-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(201,162,39,0.1);
+    border: 1px solid rgba(201,162,39,0.3);
+    color: var(--gold-bright);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    padding: 5px 12px;
+    border-radius: 100px;
+    margin-bottom: 14px;
+  }
+
+  form#waitlist {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .form-row {
+    display: flex;
+    gap: 10px;
+  }
+  input[type="email"],
+  input[type="text"],
+  select {
+    flex: 1;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 13px 16px;
+    color: var(--ivory);
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  input::placeholder { color: var(--slate-dim); }
+  input:focus, select:focus {
+    border-color: var(--gold);
+    background: var(--bg-card);
+  }
+  select {
+    color: var(--slate);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%238B95B0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+  }
+  select:invalid { color: var(--slate-dim); }
+
+  button.cta {
+    background: var(--gold);
+    color: #1A1505;
+    border: none;
+    border-radius: 8px;
+    padding: 14px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+  }
+  button.cta:hover { background: var(--gold-bright); }
+  button.cta:active { transform: scale(0.98); }
+
+  .form-note {
+    font-size: 12px;
+    color: var(--slate-dim);
+    margin-top: 2px;
+  }
+
+  .form-success {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    background: rgba(61,220,151,0.08);
+    border: 1px solid rgba(61,220,151,0.25);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 14px;
+    color: var(--green);
+  }
+  .form-success.show { display: flex; }
+  #waitlist.hidden { display: none; }
+
+  /* ============ SECTION HEADERS ============ */
+  .section {
+    padding: 72px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-size: 34px;
+    font-weight: 500;
+    color: var(--ivory);
+  }
+  .section-desc {
+    font-size: 14px;
+    color: var(--slate);
+    max-width: 360px;
+    text-align: right;
+  }
+  @media (max-width: 760px) {
+    .section-desc { text-align: left; max-width: 100%; }
+  }
+
+  /* ============ PROBLEM ============ */
+  .problem-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .problem-card {
+    background: var(--bg-elevated);
+    padding: 28px 24px;
+  }
+  .problem-card .stat {
+    font-family: 'Fraunces', serif;
+    font-size: 40px;
+    font-weight: 500;
+    color: var(--red-soft);
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+  .problem-card .stat-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ivory);
+    margin-bottom: 6px;
+  }
+  .problem-card .stat-desc {
+    font-size: 13px;
+    color: var(--slate);
+  }
+
+  /* ============ MVP / CAPABILITIES ============ */
+  .capabilities {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .capability {
+    background: var(--bg-elevated);
+    padding: 28px 32px;
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    gap: 28px;
+    align-items: center;
+  }
+  .capability-icon {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    color: var(--gold);
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    width: 56px; height: 56px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .capability-body h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ivory);
+    margin-bottom: 6px;
+  }
+  .capability-body p {
+    font-size: 13.5px;
+    color: var(--slate);
+  }
+  .capability-status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 100px;
+    white-space: nowrap;
+    text-align: center;
+  }
+  .status-working {
+    background: rgba(61,220,151,0.1);
+    border: 1px solid rgba(61,220,151,0.3);
+    color: var(--green);
+  }
+  .status-tuning {
+    background: rgba(201,162,39,0.1);
+    border: 1px solid rgba(201,162,39,0.3);
+    color: var(--gold-bright);
+  }
+  @media (max-width: 700px) {
+    .capability { grid-template-columns: 56px 1fr; }
+    .capability-status { grid-column: 2; justify-self: start; margin-top: 8px; }
+  }
+
+  /* ============ FEATURES GRID (What's Working) ============ */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .feature-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .feature-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .feature-icon {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    color: var(--gold);
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .feature-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+  .tag-ready {
+    background: rgba(61,220,151,0.1);
+    border: 1px solid rgba(61,220,151,0.3);
+    color: var(--green);
+  }
+  .tag-tuning {
+    background: rgba(201,162,39,0.1);
+    border: 1px solid rgba(201,162,39,0.3);
+    color: var(--gold-bright);
+  }
+  .feature-card h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ivory);
+    margin-bottom: 8px;
+  }
+  .feature-card p {
+    font-size: 13.5px;
+    color: var(--slate);
+    line-height: 1.65;
+  }
+  @media (max-width: 700px) {
+    .features-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ============ TIMELINE / CAUSE LIST ============ */
+  .causelist {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .causelist-header {
+    display: grid;
+    grid-template-columns: 100px 1fr 160px 140px;
+    padding: 16px 28px;
+    background: var(--bg-elevated);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--slate-dim);
+    border-bottom: 1px solid var(--border);
+  }
+  .causelist-row {
+    display: grid;
+    grid-template-columns: 100px 1fr 160px 140px;
+    padding: 22px 28px;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+    background: var(--bg-card);
+  }
+  .causelist-row:last-child { border-bottom: none; }
+  .causelist-row.active { background: var(--bg-elevated); }
+
+  .cl-stage {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    color: var(--slate-dim);
+    font-weight: 500;
+  }
+  .causelist-row.done .cl-stage { color: var(--green); }
+  .causelist-row.active .cl-stage { color: var(--gold-bright); }
+
+  .cl-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ivory);
+    margin-bottom: 4px;
+  }
+  .cl-desc {
+    font-size: 13px;
+    color: var(--slate);
+  }
+  .cl-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--slate);
+  }
+  .cl-status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 100px;
+    text-align: center;
+    width: fit-content;
+  }
+  .cl-status.done {
+    background: rgba(61,220,151,0.1);
+    border: 1px solid rgba(61,220,151,0.3);
+    color: var(--green);
+  }
+  .cl-status.active {
+    background: rgba(201,162,39,0.1);
+    border: 1px solid rgba(201,162,39,0.3);
+    color: var(--gold-bright);
+  }
+  .cl-status.pending {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--slate-dim);
+  }
+  @media (max-width: 760px) {
+    .causelist-header { display: none; }
+    .causelist-row {
+      grid-template-columns: 1fr;
+      gap: 8px;
+      padding: 20px;
+    }
+    .cl-stage { font-size: 18px; }
+  }
+
+  /* progress bar */
+  .progress-bar-wrap {
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--bg-elevated);
+    border-radius: 100px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .progress-fill {
+    height: 100%;
+    width: 62%;
+    background: linear-gradient(90deg, var(--gold), var(--green));
+    border-radius: 100px;
+  }
+  .progress-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--gold-bright);
+    white-space: nowrap;
+  }
+
+  /* ============ FOOTER CTA ============ */
+  .final-cta {
+    padding: 80px 0;
+    text-align: center;
+  }
+  .final-cta h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 38px;
+    font-weight: 500;
+    margin-bottom: 16px;
+  }
+  .final-cta p {
+    color: var(--slate);
+    font-size: 15px;
+    max-width: 440px;
+    margin: 0 auto 32px;
+  }
+  .final-cta form {
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  footer {
+    padding: 32px 0 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--slate-dim);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 860px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+    .hero-side {
+      border-left: none;
+      border-top: 1px solid var(--border);
+      padding-left: 0;
+      padding-top: 32px;
+    }
+    h1 { font-size: 40px; }
+    .signup-card { grid-template-columns: 1fr; }
+    .signup-divider { display: none; }
+    .problem-grid { grid-template-columns: 1fr; }
+    .form-row { flex-direction: column; }
+    .section-title { font-size: 26px; }
+  }
+
+  @media (max-width: 600px) {
+    .wrap { padding: 0 16px; }
+
+    nav { padding: 20px 0; flex-wrap: wrap; gap: 10px; }
+    .logo { font-size: 16px; }
+    .nav-status { font-size: 11px; padding: 5px 12px; }
+
+    .hero { padding: 40px 0 40px; }
+    .docket { flex-wrap: wrap; gap: 10px; margin-bottom: 24px; }
+    .eyebrow { font-size: 10.5px; letter-spacing: 0.12em; }
+    .docket-line { display: none; }
+
+    h1 { font-size: 30px; line-height: 1.2; }
+    .hero-sub { font-size: 15px; }
+
+    .hero-side { padding-top: 24px; }
+    .hero-side .target-date { font-size: 26px; }
+
+    .signup-card { padding: 20px; gap: 24px; }
+    .signup-left h3 { font-size: 19px; }
+    .cohort-badge { font-size: 10px; padding: 5px 10px; }
+
+    button.cta { width: 100%; padding: 14px 20px; }
+
+    .section { padding: 48px 0; }
+    .section-head { margin-bottom: 28px; }
+    .section-title { font-size: 22px; }
+    .section-desc { font-size: 13px; }
+
+    .problem-card { padding: 22px 18px; }
+    .problem-card .stat { font-size: 32px; }
+
+    .feature-card { padding: 20px; }
+    .feature-icon { width: 40px; height: 40px; font-size: 20px; }
+    .feature-card h4 { font-size: 15px; }
+
+    .causelist-row {
+      padding: 18px 16px;
+      gap: 6px;
+    }
+    .cl-stage { font-size: 16px; }
+    .cl-date, .cl-status { margin-top: 2px; }
+    .cl-status { width: fit-content; }
+
+    .progress-bar-wrap { flex-direction: column; align-items: stretch; gap: 10px; }
+    .progress-label { text-align: center; }
+
+    .final-cta { padding: 56px 0; }
+    .final-cta h2 { font-size: 26px; }
+    .final-cta p { font-size: 14px; }
+
+    footer { padding: 24px 0 36px; font-size: 11px; text-align: center; justify-content: center; }
+  }
+
+  @media (max-width: 380px) {
+    h1 { font-size: 26px; }
+    .hero-side .target-date { font-size: 22px; }
+    .logo-mark { width: 26px; height: 26px; font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- NAV -->
+  <nav>
+    <div class="logo">
+      <div class="logo-mark">V</div>
+      VakeelHelp
+    </div>
+    <div class="nav-status">
+      <span class="pulse-dot"></span>
+      In active development
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="docket">
+      <span class="eyebrow">For Advocates and Small Law Firms in India</span>
+      <div class="docket-line"></div>
+    </div>
+
+    <div class="hero-grid">
+      <div>
+        <h1>Hours of legal research, <em>done before your chai gets cold.</em></h1>
+        <p class="hero-sub">
+          VakeelHelp reads your case file, searches real Indian court records, builds your arguments, prepares for the opposition's counter-arguments, and shows how a court is likely to rule. Walk into every matter prepared, not scrambling.
+        </p>
+      </div>
+
+      <div class="hero-side">
+        <div class="hero-side-label">Target Launch</div>
+        <div class="target-date">November 2026</div>
+        <div class="target-sub">Public early access</div>
+        <p style="margin-top: 20px;">
+          A working version is already running. We are testing it against real cases and improving its accuracy before opening it up.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROBLEM -->
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <div class="section-num">01. The problem</div>
+        <div class="section-title">Every case starts the same way.</div>
+      </div>
+      <div class="section-desc">Before any argument is made, hours disappear into research that a machine can now do in minutes.</div>
+    </div>
+
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="stat">4-8 hrs</div>
+        <div class="stat-label">Lost to research</div>
+        <div class="stat-desc">Per case, just to find relevant judgments and statutes across scattered databases.</div>
+      </div>
+      <div class="problem-card">
+        <div class="stat">No structure</div>
+        <div class="stat-label">Arguments from memory</div>
+        <div class="stat-desc">Strategy is built on experience alone, with no systematic check on what the other side might argue.</div>
+      </div>
+      <div class="problem-card">
+        <div class="stat">Blind entry</div>
+        <div class="stat-label">Unknown court patterns</div>
+        <div class="stat-desc">Walking into a courtroom without knowing how that bench has ruled on similar matters before.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOLUTION / WHAT WE'RE BUILDING -->
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <div class="section-num">02. What we're building</div>
+        <div class="section-title">One tool that does the groundwork for you.</div>
+      </div>
+      <div class="section-desc">A working version already exists. We're testing it on real cases right now and improving it before opening access.</div>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-top">
+          <div class="feature-icon">⌕</div>
+          <span class="feature-tag tag-tuning">Being refined</span>
+        </div>
+        <h4>Find the right cases and laws</h4>
+        <p>Give it the facts of your case, and it searches Indian court records to find judgments and statutes that apply.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-top">
+          <div class="feature-icon">⚖</div>
+          <span class="feature-tag tag-ready">Ready</span>
+        </div>
+        <h4>Build your arguments</h4>
+        <p>Get a ranked list of arguments backed by law, along with the counter-arguments the other side is likely to raise and how to respond to them.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-top">
+          <div class="feature-icon">◔</div>
+          <span class="feature-tag tag-tuning">Being refined</span>
+        </div>
+        <h4>Understand the court</h4>
+        <p>See how a particular court has tended to rule on similar matters, so you know what to expect before you file.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-top">
+          <div class="feature-icon">⌬</div>
+          <span class="feature-tag tag-ready">Ready</span>
+        </div>
+        <h4>Built for litigation and advisory work</h4>
+        <p>Use one mode for matters already in court, and a separate, lighter mode for notices, deeds, and disputes that haven't reached litigation yet.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SIGNUP -->
+  <section class="section">
+    <div class="signup-card" id="signup">
+      <div class="signup-left">
+        <div class="cohort-badge">⚖ First 200 advocates get free access for life</div>
+        <h3>Get early access</h3>
+        <p>Be part of the founding cohort. Early sign-ups get full access at no cost, before public pricing begins.</p>
+      </div>
+      <div class="signup-divider"></div>
+      <div>
+        <form id="waitlist" action="https://formspree.io/f/xwvjyqgp" method="POST">
+          <div class="form-row">
+            <input type="text" name="name" placeholder="Your name" required>
+          </div>
+          <div class="form-row">
+            <input type="email" name="email" placeholder="you@lawfirm.com" required>
+          </div>
+          <div class="form-row">
+            <select name="role" required>
+              <option value="" disabled selected>I am a...</option>
+              <option value="independent_advocate">Independent advocate</option>
+              <option value="small_firm">Small firm (2-10 advocates)</option>
+              <option value="law_student">Law student / researcher</option>
+              <option value="other">Other</option>
+            </select>
+            <button type="submit" class="cta">Join waitlist →</button>
+          </div>
+          <div class="form-note">No spam. We will send one email when early access opens, nothing else.</div>
+        </form>
+        <div class="form-success" id="formSuccess">
+          ✓ You're on the list. We'll email you when access opens.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIMELINE -->
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <div class="section-num">03. Progress</div>
+        <div class="section-title">Where things stand.</div>
+      </div>
+      <div class="section-desc">Tracking toward a November 2026 early access launch.</div>
+    </div>
+
+    <div class="causelist">
+      <div class="causelist-header">
+        <div>Stage</div>
+        <div>Milestone</div>
+        <div>Target</div>
+        <div>Status</div>
+      </div>
+
+      <div class="causelist-row done">
+        <div class="cl-stage">I</div>
+        <div>
+          <div class="cl-title">Built the core system</div>
+          <div class="cl-desc">The backend, AI engine, and case management tools are built and running.</div>
+        </div>
+        <div class="cl-date">Completed</div>
+        <div class="cl-status done">Done</div>
+      </div>
+
+      <div class="causelist-row active">
+        <div class="cl-stage">II</div>
+        <div>
+          <div class="cl-title">Testing with real cases</div>
+          <div class="cl-desc">Checking the research and court analysis against real matters, with help from practicing advocates.</div>
+        </div>
+        <div class="cl-date">Aug to Sep 2026</div>
+        <div class="cl-status active">In progress</div>
+      </div>
+
+      <div class="causelist-row">
+        <div class="cl-stage">III</div>
+        <div>
+          <div class="cl-title">Pilot with early advocates</div>
+          <div class="cl-desc">The first 200 sign-ups try the full workflow on their own cases.</div>
+        </div>
+        <div class="cl-date">Oct 2026</div>
+        <div class="cl-status pending">Upcoming</div>
+      </div>
+
+      <div class="causelist-row">
+        <div class="cl-stage">IV</div>
+        <div>
+          <div class="cl-title">Public early access</div>
+          <div class="cl-desc">Access opens for everyone on the waitlist. Early sign-ups keep free access.</div>
+        </div>
+        <div class="cl-date">Nov 2026</div>
+        <div class="cl-status pending">Upcoming</div>
+      </div>
+    </div>
+
+    <div class="progress-bar-wrap">
+      <div class="progress-bar"><div class="progress-fill"></div></div>
+      <div class="progress-label">About 62% of the way there</div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final-cta">
+    <h2>Get early access when it opens.</h2>
+    <p>Join the founding cohort of 200 advocates. Free access, no catch. Just an early look at a tool built for how Indian litigation actually works.</p>
+      <div>
+        <button type="submit" class="cta" onclick="document.getElementById('signup').scrollIntoView({behavior:'smooth'}); document.querySelector('#waitlist input[type=email]').focus();">Join waitlist</button>
+      </div>
+  </section>
+
+  <footer>
+    <div>© 2026 VakeelHelp. Built in India.</div>
+  </footer>
+
+</div>
+
+<script>
+  const form = document.getElementById('waitlist');
+  const success = document.getElementById('formSuccess');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (response.ok) {
+        form.classList.add('hidden');
+        success.classList.add('show');
+      } else {
+        alert('Something went wrong. Please try again or email us directly.');
+      }
+    } catch (err) {
+      alert('Something went wrong. Please try again or email us directly.');
+    }
+  });
+</script>
+
+</body>
+</html>
